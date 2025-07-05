@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import {Test, console2} from "forge-std/Test.sol";
 import {IERC20} from "forge-std/interfaces/IERC20.sol";
 import {BaseHook} from "@v4-periphery/src/utils/BaseHook.sol";
 
@@ -20,12 +19,10 @@ contract CSMM is BaseHook {
     using PoolIdLibrary for PoolKey;
 
     struct CallbackData {
-        address sender;
-        PoolKey key;
-        ModifyLiquidityParams params;
-        bytes hookData;
-        bool settleUsingBurn;
-        bool takeClaims;
+        address payer;
+        Currency currency0;
+        Currency currency1;
+        uint256 amountPerToken;
     }
 
     constructor(IPoolManager _poolManager) BaseHook(_poolManager) {}
@@ -107,41 +104,41 @@ contract CSMM is BaseHook {
     /// @param key PoolKey of the pool to add liquidity to
     /// @param amountPerToken The amount of each token to be added as liquidity
     function addLiquidity(PoolKey calldata key, uint256 amountPerToken) external {
-        console2.log("In addLiquidity about to call poolManager.unlock");
-        // poolManager.unlock(abi.encode(msg.sender, key.currency0, key.currency1, amountPerToken));
-        // TODO need to pass in params
-        ModifyLiquidityParams memory params;
+        CallbackData memory callBackData;
+        callBackData.payer = msg.sender;
+        callBackData.currency0 = key.currency0;
+        callBackData.currency1 = key.currency1;
+        callBackData.amountPerToken = amountPerToken;
         poolManager.unlock(
-            abi.encode(CallbackData(msg.sender, key, params, new bytes(0), false, false))
+            abi.encode(
+                CallbackData(
+                    callBackData.payer,
+                    callBackData.currency0,
+                    callBackData.currency1,
+                    callBackData.amountPerToken
+                )
+            )
         );
-        // (BalanceDelta);
-        console2.log("Finished poolManager.unlock");
     }
 
-    // function _unlockCallback(bytes calldata data) internal virtual returns (bytes memory) {
-    function unlockCallback(bytes calldata data) external returns (bytes memory) {
-        console2.log("In CSMM _unlock_callback");
-        // TODO need to successfully decode and populate variables below
-        // TODO remove logging when working
-        (address payer, Currency currency0, Currency currency1, uint256 amountPerToken) =
-            abi.decode(data, (address, Currency, Currency, uint256));
-
-        // CallbackData memory data = abi.decode(rawData, (CallbackData));
-
-        console2.log("Have decoded CallbackData");
-
+    function unlockCallback(bytes calldata rawData) external returns (bytes memory) {
+        CallbackData memory callBackData = abi.decode(rawData, (CallbackData));
         // transfer ERC20 to PoolManager
-        poolManager.sync(currency0);
-        IERC20(Currency.unwrap(currency0)).transferFrom(payer, address(poolManager), amountPerToken);
+        poolManager.sync(callBackData.currency0);
+        IERC20(Currency.unwrap(callBackData.currency0)).transferFrom(
+            callBackData.payer, address(poolManager), callBackData.amountPerToken
+        );
         poolManager.settle();
 
-        poolManager.sync(currency1);
-        IERC20(Currency.unwrap(currency1)).transferFrom(payer, address(poolManager), amountPerToken);
+        poolManager.sync(callBackData.currency1);
+        IERC20(Currency.unwrap(callBackData.currency1)).transferFrom(
+            callBackData.payer, address(poolManager), callBackData.amountPerToken
+        );
         poolManager.settle();
 
         // mint ERC6909 to the hook
-        poolManager.mint(address(this), currency0.toId(), amountPerToken);
-        poolManager.mint(address(this), currency1.toId(), amountPerToken);
+        poolManager.mint(address(this), callBackData.currency0.toId(), callBackData.amountPerToken);
+        poolManager.mint(address(this), callBackData.currency1.toId(), callBackData.amountPerToken);
 
         // TODO: mint an LP receipt token
 
