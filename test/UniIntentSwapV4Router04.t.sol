@@ -19,8 +19,8 @@ import {
     IPoolManager,
     ISignatureTransfer,
     BaseData,
-    UniswapV4Router04
-} from "../src/UniswapV4Router04.sol";
+    UniIntentSwapV4Router04
+} from "../src/UniIntentSwapV4Router04.sol";
 
 import {SwapRouterFixtures, Deployers} from "./utils/SwapRouterFixtures.sol";
 import {MockCurrencyLibrary} from "./utils/mocks/MockCurrencyLibrary.sol";
@@ -28,7 +28,7 @@ import {MockCurrencyLibrary} from "./utils/mocks/MockCurrencyLibrary.sol";
 contract RouterTest is SwapRouterFixtures {
     using MockCurrencyLibrary for Currency;
 
-    UniswapV4Router04 router;
+    UniIntentSwapV4Router04 router;
 
     Counter hook;
     CustomCurveHook hookCsmm;
@@ -41,7 +41,7 @@ contract RouterTest is SwapRouterFixtures {
     function setUp() public payable {
         // Deploy v4 contracts
         Deployers.deployFreshManagerAndRouters();
-        router = new UniswapV4Router04(manager, permit2);
+        router = new UniIntentSwapV4Router04(manager, permit2);
 
         // Create currencies
         (currencyA, currencyB, currencyC, currencyD) = _createSortedCurrencies();
@@ -126,7 +126,7 @@ contract RouterTest is SwapRouterFixtures {
     }
 
     function test_router_deploy_gas() public {
-        router = new UniswapV4Router04(manager, permit2);
+        router = new UniIntentSwapV4Router04(manager, permit2);
     }
 
     function test_zero_for_one() public {

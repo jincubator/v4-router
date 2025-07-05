@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.26;
 
+import {Test, console2} from "forge-std/Test.sol";
 import {IERC20} from "@forge/interfaces/IERC20.sol";
 
 import {PoolKey} from "@v4/src/types/PoolKey.sol";
+import {PoolId} from "@v4/src/types/PoolId.sol";
 import {IHooks} from "@v4/src/interfaces/IHooks.sol";
 import {Hooks} from "@v4/src/libraries/Hooks.sol";
 import {Currency, CurrencyLibrary} from "@v4/src/types/Currency.sol";
@@ -68,9 +70,18 @@ contract SwapRouterFixtures is Deployers, DeployPermit2, PermitSignature {
         for (uint256 i = 0; i < poolKeys.length; i++) {
             _poolKey = poolKeys[i];
             msgValue = _poolKey.currency0 == native ? 100 ether : 0;
+            console2.log("About to Modify Liquidity");
             modifyLiquidityRouter.modifyLiquidity{value: msgValue}(
                 _poolKey, LIQUIDITY_PARAMS, ZERO_BYTES
             );
+            console2.log("Modified Liquidity");
+            console2.log(Currency.unwrap(_poolKey.currency0));
+            console2.log(Currency.unwrap(_poolKey.currency1));
+            console2.log(_poolKey.fee);
+            console2.log(_poolKey.tickSpacing);
+            // console2.log(Currency.unwrap(_poolKey.hooks).sender);
+            // console2.log(LIQUIDITY_PARAMS);
+            // console2.log(ZERO_BYTES);
         }
     }
 
@@ -107,11 +118,13 @@ contract SwapRouterFixtures is Deployers, DeployPermit2, PermitSignature {
     }
 
     function _addLiquidityCSMM(PoolKey[] memory poolKeys, uint256 liquidity) internal {
+        console2.log("In _addLiquidityCSMM");
         PoolKey memory poolKey;
         for (uint256 i = 0; i < poolKeys.length; i++) {
             poolKey = poolKeys[i];
             IERC20(Currency.unwrap(poolKey.currency0)).approve(address(csmm), liquidity);
             IERC20(Currency.unwrap(poolKey.currency1)).approve(address(csmm), liquidity);
+            console2.log("About to call csmm.addLiquidity");
             csmm.addLiquidity(poolKey, liquidity);
         }
     }

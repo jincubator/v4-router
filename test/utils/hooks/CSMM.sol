@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
+import {Test, console2} from "forge-std/Test.sol";
 import {IERC20} from "forge-std/interfaces/IERC20.sol";
-import {BaseHook} from "v4-periphery/src/base/hooks/BaseHook.sol";
+import {BaseHook} from "@v4-periphery/src/utils/BaseHook.sol";
 
 import {Hooks} from "@v4/src/libraries/Hooks.sol";
 import {IPoolManager} from "@v4/src/interfaces/IPoolManager.sol";
+import {SwapParams, ModifyLiquidityParams} from "v4-core/src/types/PoolOperation.sol";
 import {PoolKey} from "@v4/src/types/PoolKey.sol";
 import {PoolId, PoolIdLibrary} from "@v4/src/types/PoolId.sol";
 import {BalanceDelta} from "@v4/src/types/BalanceDelta.sol";
@@ -16,6 +18,15 @@ import {SafeCast} from "@v4/src/libraries/SafeCast.sol";
 contract CSMM is BaseHook {
     using SafeCast for uint256;
     using PoolIdLibrary for PoolKey;
+
+    struct CallbackData {
+        address sender;
+        PoolKey key;
+        ModifyLiquidityParams params;
+        bytes hookData;
+        bool settleUsingBurn;
+        bool takeClaims;
+    }
 
     constructor(IPoolManager _poolManager) BaseHook(_poolManager) {}
 
@@ -39,12 +50,11 @@ contract CSMM is BaseHook {
     }
 
     /// @notice Constant sum swap via custom accounting, tokens are exchanged 1:1
-    function beforeSwap(
-        address,
-        PoolKey calldata key,
-        IPoolManager.SwapParams calldata params,
-        bytes calldata
-    ) external override returns (bytes4, BeforeSwapDelta, uint24) {
+    function _beforeSwap(address, PoolKey calldata key, SwapParams calldata params, bytes calldata)
+        internal
+        override
+        returns (bytes4, BeforeSwapDelta, uint24)
+    {
         // determine inbound/outbound token based on 0->1 or 1->0 swap
         (Currency inputCurrency, Currency outputCurrency) =
             params.zeroForOne ? (key.currency0, key.currency1) : (key.currency1, key.currency0);
@@ -81,12 +91,12 @@ contract CSMM is BaseHook {
     }
 
     /// @notice No liquidity will be managed by v4 PoolManager
-    function beforeAddLiquidity(
+    function _beforeAddLiquidity(
         address,
         PoolKey calldata,
-        IPoolManager.ModifyLiquidityParams calldata,
+        ModifyLiquidityParams calldata,
         bytes calldata
-    ) external pure override returns (bytes4) {
+    ) internal pure override returns (bytes4) {
         revert("No v4 Liquidity allowed");
     }
 
@@ -97,17 +107,28 @@ contract CSMM is BaseHook {
     /// @param key PoolKey of the pool to add liquidity to
     /// @param amountPerToken The amount of each token to be added as liquidity
     function addLiquidity(PoolKey calldata key, uint256 amountPerToken) external {
-        poolManager.unlock(abi.encode(msg.sender, key.currency0, key.currency1, amountPerToken));
+        console2.log("In addLiquidity about to call poolManager.unlock");
+        // poolManager.unlock(abi.encode(msg.sender, key.currency0, key.currency1, amountPerToken));
+        // TODO need to pass in params
+        ModifyLiquidityParams memory params;
+        poolManager.unlock(
+            abi.encode(CallbackData(msg.sender, key, params, new bytes(0), false, false))
+        );
+        // (BalanceDelta);
+        console2.log("Finished poolManager.unlock");
     }
 
-    function _unlockCallback(bytes calldata data)
-        internal
-        virtual
-        override
-        returns (bytes memory)
-    {
+    // function _unlockCallback(bytes calldata data) internal virtual returns (bytes memory) {
+    function unlockCallback(bytes calldata data) external returns (bytes memory) {
+        console2.log("In CSMM _unlock_callback");
+        // TODO need to successfully decode and populate variables below
+        // TODO remove logging when working
         (address payer, Currency currency0, Currency currency1, uint256 amountPerToken) =
             abi.decode(data, (address, Currency, Currency, uint256));
+
+        // CallbackData memory data = abi.decode(rawData, (CallbackData));
+
+        console2.log("Have decoded CallbackData");
 
         // transfer ERC20 to PoolManager
         poolManager.sync(currency0);
