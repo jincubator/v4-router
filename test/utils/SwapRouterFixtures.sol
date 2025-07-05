@@ -8,7 +8,7 @@ import {PoolId} from "@v4/src/types/PoolId.sol";
 import {IHooks} from "@v4/src/interfaces/IHooks.sol";
 import {Hooks} from "@v4/src/libraries/Hooks.sol";
 import {Currency, CurrencyLibrary} from "@v4/src/types/Currency.sol";
-import {Deployers} from "@v4/test/utils/Deployers.sol";
+import {Deployers} from "./Deployers.sol";
 import {SafeCast} from "@v4/src/libraries/SafeCast.sol";
 
 import {MockERC20} from "@solady/test/utils/mocks/MockERC20.sol";
