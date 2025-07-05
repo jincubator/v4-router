@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.26;
 
-import {Test, console2} from "forge-std/Test.sol";
 import {Hooks} from "@v4/src/libraries/Hooks.sol";
 import {IHooks} from "@v4/src/interfaces/IHooks.sol";
 import {PoolKey} from "@v4/src/types/PoolKey.sol";
@@ -44,7 +43,6 @@ contract GasTest is SwapRouterFixtures {
     // Test contract inherits `receive` function through SwapRouterFixtures' Deployers contract
 
     function setUp() public payable {
-        console2.log("In setup");
         (alice, alicePK) = makeAddrAndKey("ALICE");
 
         // Deploy v4 contracts
@@ -104,12 +102,10 @@ contract GasTest is SwapRouterFixtures {
         _addLiquidity(vanillaPoolKeys, 10_000e18);
         _addLiquidity(nativePoolKeys, 10_000e18);
         _addLiquidity(hookedPoolKeys, 10_000e18);
-        console2.log("about to call _addLiquidityCSMM");
         _addLiquidityCSMM(csmmPoolKeys, 1_000e18);
     }
 
     function test_gas_multi_exactInput() public {
-        console2.log("In test_gas_multi_exactInput");
         // Swap Path: A --> B --> C
         Currency startCurrency = currencyA;
         PathKey[] memory path = new PathKey[](2);
@@ -138,7 +134,6 @@ contract GasTest is SwapRouterFixtures {
         vm.snapshotGasLastCall(
             _snapshotString(true, false, TokenType.ERC20, TokenType.ERC20, "vanilla")
         );
-        console2.log("Leaving test_gas_multi_exactInput");
     }
 
     function test_gas_multi_exactInput_nativeInput() public {
