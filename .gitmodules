@@ -13,12 +13,12 @@
 [submodule "lib/v4-periphery"]
 	path = lib/v4-periphery
 	url = https://github.com/uniswap/v4-periphery
-[submodule "lib/v4-template"]
-	path = lib/v4-template
-	url = https://github.com/uniswapfoundation/v4-template
 [submodule "lib/permit2"]
 	path = lib/permit2
 	url = https://github.com/uniswap/permit2
 [submodule "lib/universal-router"]
 	path = lib/universal-router
 	url = https://github.com/Uniswap/universal-router
+[submodule "lib/hookmate"]
+	path = lib/hookmate
+	url = https://github.com/jincubator/hookmate.git

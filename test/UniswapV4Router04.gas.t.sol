@@ -6,8 +6,7 @@ import {IHooks} from "@v4/src/interfaces/IHooks.sol";
 import {PoolKey} from "@v4/src/types/PoolKey.sol";
 import {Currency} from "@v4/src/types/Currency.sol";
 import {PathKey} from "../src/libraries/PathKey.sol";
-
-import {Counter} from "@v4-template/src/Counter.sol";
+import {Counter} from "./utils/hooks/Counter.sol";
 
 import {ISignatureTransfer, UniswapV4Router04} from "../src/UniswapV4Router04.sol";
 
