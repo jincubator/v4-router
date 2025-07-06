@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
-import {console2} from "forge-std/console2.sol";
 import {Hooks} from "@v4/src/libraries/Hooks.sol";
 import {HookMiner} from "@v4-periphery/src/utils/HookMiner.sol";
 
@@ -25,21 +24,13 @@ library IntentSwapHookDeployer {
     }
 
     function deploy(address poolManager) internal returns (address IntentSwapHook) {
-        console2.log("In IntentSwapHookDeployer.deploy");
-        // uint160 intentSwapHookFlags = uint160(Hooks.BEFORE_SWAP_FLAG);
         uint160 intentSwapHookFlags =
             uint160(Hooks.BEFORE_SWAP_FLAG | Hooks.BEFORE_SWAP_RETURNS_DELTA_FLAG);
-        console2.log(intentSwapHookFlags);
         bytes memory constructorArgs = abi.encode(poolManager); // Add all the necessary constructor arguments from the hook
         bytes memory fullInitcode = abi.encodePacked(initcode(), constructorArgs);
         (address intentSwapHookAddress, bytes32 salt) =
             HookMiner.find(address(this), intentSwapHookFlags, fullInitcode, new bytes(0)); //constructorArgs is empty becaused packed above
-
-        console2.log(intentSwapHookAddress);
-        console2.logBytes32(salt);
-
         IntentSwapHook = create2(fullInitcode, salt);
-        console2.log(IntentSwapHook);
     }
 
     function initcode() internal pure returns (bytes memory) {

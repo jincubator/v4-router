@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
-import {console2} from "forge-std/console2.sol";
 import {Hooks} from "@v4/src/libraries/Hooks.sol";
 import {HookMiner} from "@v4-periphery/src/utils/HookMiner.sol";
 
@@ -25,24 +24,16 @@ library CounterDeployer {
     }
 
     function deploy(address poolManager) internal returns (address Counter) {
-        console2.log("In Counter Deploy");
         uint160 counterFlags = uint160(
             Hooks.BEFORE_SWAP_FLAG | Hooks.AFTER_SWAP_FLAG | Hooks.BEFORE_ADD_LIQUIDITY_FLAG
                 | Hooks.BEFORE_REMOVE_LIQUIDITY_FLAG
         );
-        console2.log(counterFlags);
         bytes memory constructorArgs = abi.encode(poolManager); // Add all the necessary constructor arguments from the hook
         bytes memory fullInitcode = abi.encodePacked(initcode(), constructorArgs);
         (address counterAddress, bytes32 salt) =
             HookMiner.find(address(this), counterFlags, fullInitcode, new bytes(0)); //constructorArgs is empty becaused packed above
-        console2.log("In Counter Deploy - found address");
-        console2.log(counterAddress);
-        console2.logBytes32(salt);
 
         Counter = create2(fullInitcode, salt);
-        // Counter = new Hook{salt: salt}(constructorArgs);
-        // Counter = new ICounter{salt: salt}(constructorArgs);
-        console2.log("In Counter Deploy - all done");
     }
 
     function initcode() internal pure returns (bytes memory) {
