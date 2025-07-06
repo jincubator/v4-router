@@ -22,6 +22,12 @@ import {DeployPermit2} from "permit2/test/utils/DeployPermit2.sol";
 import {PermitSignature} from "permit2/test/utils/PermitSignature.sol";
 import "permit2/src/interfaces/IPermit2.sol";
 
+// Add in Counter and IntentSwap from hookmate
+import {ICounter} from "@hookmate/interfaces/ICounter.sol";
+import {CounterDeployer} from "@hookmate/artifacts/Counter.sol";
+import {IIntentSwapHook} from "@hookmate/interfaces/IIntentSwapHook.sol";
+import {IntentSwapHookDeployer} from "@hookmate/artifacts/IntentSwapHook.sol";
+
 struct TestCurrencyBalances {
     uint256 currencyA;
     uint256 currencyB;
@@ -44,6 +50,8 @@ contract SwapRouterFixtures is Deployers, DeployPermit2, PermitSignature {
     Currency currencyD;
 
     CSMM csmm;
+    ICounter counterHook;
+    IIntentSwapHook intentSwapHook;
     HookData hookWithData;
     HookMsgSender hookMsgSender;
     ISignatureTransfer permit2 = ISignatureTransfer(address(PERMIT2_ADDRESS));
@@ -87,6 +95,21 @@ contract SwapRouterFixtures is Deployers, DeployPermit2, PermitSignature {
         bytes memory constructorArgs = abi.encode(manager);
         deployCodeTo("test/utils/hooks/CSMM.sol:CSMM", constructorArgs, flags);
         csmm = CSMM(flags);
+        vm.label(address(csmm), "CSMM");
+    }
+
+    function _deployCounterHook() internal {
+        counterHook = ICounter(payable(CounterDeployer.deploy(address(manager), address(permit2))));
+
+        vm.label(address(counterHook), "Counter");
+    }
+
+    function _deployIntentSwapHook() internal {
+        intentSwapHook = IIntentSwapHook(
+            payable(IntentSwapHookDeployer.deploy(address(manager), address(permit2)))
+        );
+
+        vm.label(address(intentSwapHook), "IntentSwapHook");
     }
 
     function _deployHookWithData() internal {
