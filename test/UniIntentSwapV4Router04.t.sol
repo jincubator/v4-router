@@ -58,37 +58,26 @@ contract RouterTest is SwapRouterFixtures {
         currencyC.maxApprove(address(modifyLiquidityRouter));
         currencyD.maxApprove(address(modifyLiquidityRouter));
 
-        // Deploy the hook to an address with the correct flags
-        _deployCSMM();
+        // Deploy hooks to an address with the correct flags
+        // _deployCSMM();
+        // Deploy CustomCurveHook
+        address csmmFlags =
+            address(uint160(Hooks.BEFORE_SWAP_FLAG | Hooks.AFTER_SWAP_FLAG) ^ (0x5555 << 144));
+        bytes memory csmmConstructorArgs = abi.encode(manager);
+        deployCodeTo("CustomCurveHook.sol:CustomCurveHook", csmmConstructorArgs, csmmFlags);
+        hookCsmm = CustomCurveHook(csmmFlags);
         _deployCounterHook();
         _deployIntentSwapHook();
 
-        // Deploy Counter hook
-        // address flags = address(
-        //     uint160(
-        //         Hooks.BEFORE_SWAP_FLAG | Hooks.AFTER_SWAP_FLAG | Hooks.BEFORE_ADD_LIQUIDITY_FLAG
-        //             | Hooks.BEFORE_REMOVE_LIQUIDITY_FLAG
-        //     ) ^ (0x4444 << 144)
-        // );
-
-        // bytes memory constructorArgs = abi.encode(manager);
-        // deployCodeTo("Counter.sol:Counter", constructorArgs, flags);
-        // hook = Counter(flags);
-
-        // // Deploy CustomCurveHook
-        // address csmmFlags =
-        //     address(uint160(Hooks.BEFORE_SWAP_FLAG | Hooks.AFTER_SWAP_FLAG) ^ (0x5555 << 144));
-        // bytes memory csmmConstructorArgs = abi.encode(manager);
-        // deployCodeTo("CustomCurveHook.sol:CustomCurveHook", csmmConstructorArgs, csmmFlags);
-        // hookCsmm = CustomCurveHook(csmmFlags);
-
-        // Define and create all pools with their respective hooks
         console2.log("address(0)");
         console2.log(address(0));
-        console2.log("address(counterHook");
+        console2.log("address(counterHook)");
         console2.log(address(counterHook));
         console2.log("address(csmm)");
         console2.log(address(csmm));
+        console2.log("address(intentSwapHook)");
+        console2.log(address(intentSwapHook));
+        // Define and create all pools with their respective hooks
         PoolKey[] memory _vanillaPoolKeys = _createPoolKeys(address(0));
         _copyArrayToStorage(_vanillaPoolKeys, vanillaPoolKeys);
 
@@ -98,7 +87,7 @@ contract RouterTest is SwapRouterFixtures {
         PoolKey[] memory _hookedPoolKeys = _createPoolKeys(address(counterHook));
         _copyArrayToStorage(_hookedPoolKeys, hookedPoolKeys);
 
-        PoolKey[] memory _csmmPoolKeys = _createPoolKeys(address(csmm));
+        PoolKey[] memory _csmmPoolKeys = _createPoolKeys(address(hookCsmm));
         _copyArrayToStorage(_csmmPoolKeys, csmmPoolKeys);
 
         PoolKey[] memory allPoolKeys =
