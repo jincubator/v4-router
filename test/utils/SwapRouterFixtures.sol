@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.26;
 
+import {console2} from "forge-std/console2.sol";
 import {IERC20} from "@forge/interfaces/IERC20.sol";
 
 import {PoolKey} from "@v4/src/types/PoolKey.sol";
@@ -23,10 +24,11 @@ import {PermitSignature} from "permit2/test/utils/PermitSignature.sol";
 import "permit2/src/interfaces/IPermit2.sol";
 
 // Add in Counter and IntentSwap from hookmate
-import {ICounter} from "@hookmate/interfaces/ICounter.sol";
-import {CounterDeployer} from "@hookmate/artifacts/Counter.sol";
-import {IIntentSwapHook} from "@hookmate/interfaces/IIntentSwapHook.sol";
-import {IntentSwapHookDeployer} from "@hookmate/artifacts/IntentSwapHook.sol";
+import {ICounter} from "../../src/interfaces/ICounter.sol";
+import {CounterDeployer} from "./hooks/CounterDeployer.sol";
+import {IIntentSwapHook} from "../../src/interfaces/IIntentSwapHook.sol";
+import {IntentSwapHookDeployer} from "./hooks/IntentSwapHookDeployer.sol";
+import {CounterDeployer} from "./hooks/CounterDeployer.sol";
 
 struct TestCurrencyBalances {
     uint256 currencyA;
@@ -86,6 +88,7 @@ contract SwapRouterFixtures is Deployers, DeployPermit2, PermitSignature {
     /// Hook Deployment Functions ///
 
     function _deployCSMM() internal {
+        console2.log("In CSMM Deploy");
         address flags = address(
             uint160(
                 Hooks.BEFORE_SWAP_FLAG | Hooks.BEFORE_SWAP_RETURNS_DELTA_FLAG
@@ -99,17 +102,18 @@ contract SwapRouterFixtures is Deployers, DeployPermit2, PermitSignature {
     }
 
     function _deployCounterHook() internal {
-        counterHook = ICounter(payable(CounterDeployer.deploy(address(manager), address(permit2))));
-
-        vm.label(address(counterHook), "Counter");
+        console2.log("In _deployCounterHook");
+        counterHook = ICounter(CounterDeployer.deploy(address(manager)));
+        console2.log("Out _deployCounterHook");
+        vm.label(address(counterHook), "ICounter");
     }
 
     function _deployIntentSwapHook() internal {
-        intentSwapHook = IIntentSwapHook(
-            payable(IntentSwapHookDeployer.deploy(address(manager), address(permit2)))
-        );
+        console2.log("In _deployIntentSwapHook");
+        intentSwapHook = IIntentSwapHook(IntentSwapHookDeployer.deploy(address(manager)));
+        console2.log("Out _deployIntentSwapHook");
 
-        vm.label(address(intentSwapHook), "IntentSwapHook");
+        vm.label(address(intentSwapHook), "IIntentSwapHook");
     }
 
     function _deployHookWithData() internal {
