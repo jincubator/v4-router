@@ -19,6 +19,3 @@
 [submodule "lib/universal-router"]
 	path = lib/universal-router
 	url = https://github.com/Uniswap/universal-router
-[submodule "lib/hookmate"]
-	path = lib/hookmate
-	url = https://github.com/jincubator/hookmate.git
