@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {console2} from "forge-std/console2.sol";
-import {IERC20} from "@forge/interfaces/IERC20.sol";
+import {IERC20} from "@forge-std/interfaces/IERC20.sol";
 
 import {PoolKey} from "@v4/src/types/PoolKey.sol";
 import {PoolId} from "@v4/src/types/PoolId.sol";
@@ -23,7 +23,7 @@ import {DeployPermit2} from "permit2/test/utils/DeployPermit2.sol";
 import {PermitSignature} from "permit2/test/utils/PermitSignature.sol";
 import "permit2/src/interfaces/IPermit2.sol";
 
-// Add in Counter and IntentSwap from hookmate
+// Add in Counter and IntentSwap
 import {ICounter} from "../../src/interfaces/ICounter.sol";
 import {CounterDeployer} from "./hooks/CounterDeployer.sol";
 import {IIntentSwapHook} from "../../src/interfaces/IIntentSwapHook.sol";
