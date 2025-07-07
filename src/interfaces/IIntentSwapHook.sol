@@ -3,8 +3,8 @@ pragma solidity ^0.8.30;
 
 import {IBaseHook} from "./IBaseHook.sol";
 import {IntentSwap, IntentSwapAction, IntentSwapStatus} from "../types/IntentSwap.sol";
-import {PoolId, PoolIdLibrary} from "@v4/src/types/PoolId.sol";
-import {PoolKey} from "@v4/src/types/PoolKey.sol";
+import {PoolId, PoolIdLibrary} from "@uniswap/v4-core/src/types/PoolId.sol";
+import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
 
 /// @title IIntentSwap
 /// @author jincubator

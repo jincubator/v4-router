@@ -1,31 +1,31 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.26;
 
-import {Hooks} from "@v4/src/libraries/Hooks.sol";
-import {Pool} from "@v4/src/libraries/Pool.sol";
-import {SafeCast} from "@v4/src/libraries/SafeCast.sol";
-import {Position} from "@v4/src/libraries/Position.sol";
-import {LPFeeLibrary} from "@v4/src/libraries/LPFeeLibrary.sol";
-import {Currency, CurrencyLibrary} from "@v4/src/types/Currency.sol";
-import {PoolKey} from "@v4/src/types/PoolKey.sol";
-import {TickMath} from "@v4/src/libraries/TickMath.sol";
-import {NoDelegateCall} from "@v4/src/NoDelegateCall.sol";
-import {IHooks} from "@v4/src/interfaces/IHooks.sol";
-import {IPoolManager} from "@v4/src/interfaces/IPoolManager.sol";
-import {IUnlockCallback} from "@v4/src/interfaces/callback/IUnlockCallback.sol";
-import {ProtocolFees} from "@v4/src/ProtocolFees.sol";
-import {ERC6909Claims} from "@v4/src/ERC6909Claims.sol";
-import {PoolId} from "@v4/src/types/PoolId.sol";
-import {ModifyLiquidityParams, SwapParams} from "@v4/src/types/PoolOperation.sol";
-import {BalanceDelta, BalanceDeltaLibrary} from "@v4/src/types/BalanceDelta.sol";
-import {BeforeSwapDelta} from "@v4/src/types/BeforeSwapDelta.sol";
-import {Lock} from "@v4/src/libraries/Lock.sol";
-import {CurrencyDelta} from "@v4/src/libraries/CurrencyDelta.sol";
-import {NonzeroDeltaCount} from "@v4/src/libraries/NonzeroDeltaCount.sol";
-import {CurrencyReserves} from "@v4/src/libraries/CurrencyReserves.sol";
-import {Extsload} from "@v4/src/Extsload.sol";
-import {Exttload} from "@v4/src/Exttload.sol";
-import {CustomRevert} from "@v4/src/libraries/CustomRevert.sol";
+import {Hooks} from "@uniswap/v4-core/src/libraries/Hooks.sol";
+import {Pool} from "@uniswap/v4-core/src/libraries/Pool.sol";
+import {SafeCast} from "@uniswap/v4-core/src/libraries/SafeCast.sol";
+import {Position} from "@uniswap/v4-core/src/libraries/Position.sol";
+import {LPFeeLibrary} from "@uniswap/v4-core/src/libraries/LPFeeLibrary.sol";
+import {Currency, CurrencyLibrary} from "@uniswap/v4-core/src/types/Currency.sol";
+import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
+import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
+import {NoDelegateCall} from "@uniswap/v4-core/src/NoDelegateCall.sol";
+import {IHooks} from "@uniswap/v4-core/src/interfaces/IHooks.sol";
+import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
+import {IUnlockCallback} from "@uniswap/v4-core/src/interfaces/callback/IUnlockCallback.sol";
+import {ProtocolFees} from "@uniswap/v4-core/src/ProtocolFees.sol";
+import {ERC6909Claims} from "@uniswap/v4-core/src/ERC6909Claims.sol";
+import {PoolId} from "@uniswap/v4-core/src/types/PoolId.sol";
+import {ModifyLiquidityParams, SwapParams} from "@uniswap/v4-core/src/types/PoolOperation.sol";
+import {BalanceDelta, BalanceDeltaLibrary} from "@uniswap/v4-core/src/types/BalanceDelta.sol";
+import {BeforeSwapDelta} from "@uniswap/v4-core/src/types/BeforeSwapDelta.sol";
+import {Lock} from "@uniswap/v4-core/src/libraries/Lock.sol";
+import {CurrencyDelta} from "@uniswap/v4-core/src/libraries/CurrencyDelta.sol";
+import {NonzeroDeltaCount} from "@uniswap/v4-core/src/libraries/NonzeroDeltaCount.sol";
+import {CurrencyReserves} from "@uniswap/v4-core/src/libraries/CurrencyReserves.sol";
+import {Extsload} from "@uniswap/v4-core/src/Extsload.sol";
+import {Exttload} from "@uniswap/v4-core/src/Exttload.sol";
+import {CustomRevert} from "@uniswap/v4-core/src/libraries/CustomRevert.sol";
 
 //  4
 //   44

@@ -4,13 +4,13 @@ pragma solidity ^0.8.26;
 import {console2} from "forge-std/console2.sol";
 import {IERC20} from "@forge-std/interfaces/IERC20.sol";
 
-import {PoolKey} from "@v4/src/types/PoolKey.sol";
-import {PoolId} from "@v4/src/types/PoolId.sol";
-import {IHooks} from "@v4/src/interfaces/IHooks.sol";
-import {Hooks} from "@v4/src/libraries/Hooks.sol";
-import {Currency, CurrencyLibrary} from "@v4/src/types/Currency.sol";
+import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
+import {PoolId} from "@uniswap/v4-core/src/types/PoolId.sol";
+import {IHooks} from "@uniswap/v4-core/src/interfaces/IHooks.sol";
+import {Hooks} from "@uniswap/v4-core/src/libraries/Hooks.sol";
+import {Currency, CurrencyLibrary} from "@uniswap/v4-core/src/types/Currency.sol";
 import {Deployers} from "./Deployers.sol";
-import {SafeCast} from "@v4/src/libraries/SafeCast.sol";
+import {SafeCast} from "@uniswap/v4-core/src/libraries/SafeCast.sol";
 
 import {MockERC20} from "@solady/test/utils/mocks/MockERC20.sol";
 

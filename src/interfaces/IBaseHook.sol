@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
-import {IHooks} from "@v4/src/interfaces/IHooks.sol";
-import {PoolKey} from "@v4/src/types/PoolKey.sol";
-import {BalanceDelta} from "@v4/src/types/BalanceDelta.sol";
-import {ModifyLiquidityParams, SwapParams} from "@v4/src/types/PoolOperation.sol";
-import {BeforeSwapDelta} from "@v4/src/types/BeforeSwapDelta.sol";
+import {IHooks} from "@uniswap/v4-core/src/interfaces/IHooks.sol";
+import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
+import {BalanceDelta} from "@uniswap/v4-core/src/types/BalanceDelta.sol";
+import {ModifyLiquidityParams, SwapParams} from "@uniswap/v4-core/src/types/PoolOperation.sol";
+import {BeforeSwapDelta} from "@uniswap/v4-core/src/types/BeforeSwapDelta.sol";
 
 /// @notice V4 decides whether to invoke specific hooks by inspecting the least significant bits
 /// of the address that the hooks contract is deployed to.

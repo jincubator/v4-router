@@ -4,15 +4,15 @@ pragma solidity ^0.8.24;
 import {IERC20} from "forge-std/interfaces/IERC20.sol";
 import {BaseHook} from "@v4-periphery/src/utils/BaseHook.sol";
 
-import {Hooks} from "@v4/src/libraries/Hooks.sol";
-import {IPoolManager} from "@v4/src/interfaces/IPoolManager.sol";
+import {Hooks} from "@uniswap/v4-core/src/libraries/Hooks.sol";
+import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
 import {SwapParams, ModifyLiquidityParams} from "v4-core/src/types/PoolOperation.sol";
-import {PoolKey} from "@v4/src/types/PoolKey.sol";
-import {PoolId, PoolIdLibrary} from "@v4/src/types/PoolId.sol";
-import {BalanceDelta} from "@v4/src/types/BalanceDelta.sol";
-import {BeforeSwapDelta, toBeforeSwapDelta} from "@v4/src/types/BeforeSwapDelta.sol";
-import {Currency} from "@v4/src/types/Currency.sol";
-import {SafeCast} from "@v4/src/libraries/SafeCast.sol";
+import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
+import {PoolId, PoolIdLibrary} from "@uniswap/v4-core/src/types/PoolId.sol";
+import {BalanceDelta} from "@uniswap/v4-core/src/types/BalanceDelta.sol";
+import {BeforeSwapDelta, toBeforeSwapDelta} from "@uniswap/v4-core/src/types/BeforeSwapDelta.sol";
+import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
+import {SafeCast} from "@uniswap/v4-core/src/libraries/SafeCast.sol";
 
 contract CSMM is BaseHook {
     using SafeCast for uint256;

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
-import {Hooks} from "@v4/src/libraries/Hooks.sol";
+import {Hooks} from "@uniswap/v4-core/src/libraries/Hooks.sol";
 import {HookMiner} from "@v4-periphery/src/utils/HookMiner.sol";
 
 library CounterDeployer {
