@@ -7,15 +7,15 @@ import {
     Currency,
     BalanceDelta,
     ISignatureTransfer,
-    IUniIntentSwapV4Router04
-} from "./interfaces/IUniIntentSwapV4Router04.sol";
+    IUniswapV4IntentRouter
+} from "./interfaces/IUniswapV4IntentRouter.sol";
 import {LibZip} from "@solady/src/utils/LibZip.sol";
 import {Locker} from "@v4-periphery/src/libraries/Locker.sol";
 import {Multicallable} from "@solady/src/utils/Multicallable.sol";
 import {IPoolManager, SwapFlags, BaseData, BaseSwapRouter} from "./base/BaseSwapRouter.sol";
 
 /// @title Uniswap V4 Swap Router
-contract UniIntentSwapV4Router04 is IUniIntentSwapV4Router04, BaseSwapRouter, Multicallable {
+contract UniswapV4IntentRouter is IUniswapV4IntentRouter, BaseSwapRouter, Multicallable {
     modifier setMsgSender() {
         Locker.set(msg.sender);
         _;
@@ -29,7 +29,7 @@ contract UniIntentSwapV4Router04 is IUniIntentSwapV4Router04, BaseSwapRouter, Mu
 
     /// -----------------------
 
-    /// @inheritdoc IUniIntentSwapV4Router04
+    /// @inheritdoc IUniswapV4IntentRouter
     function swapExactTokensForTokens(
         uint256 amountIn,
         uint256 amountOutMin,
@@ -41,7 +41,7 @@ contract UniIntentSwapV4Router04 is IUniIntentSwapV4Router04, BaseSwapRouter, Mu
         public
         payable
         virtual
-        override(IUniIntentSwapV4Router04)
+        override(IUniswapV4IntentRouter)
         checkDeadline(deadline)
         setMsgSender
         returns (BalanceDelta)
@@ -61,7 +61,7 @@ contract UniIntentSwapV4Router04 is IUniIntentSwapV4Router04, BaseSwapRouter, Mu
         );
     }
 
-    /// @inheritdoc IUniIntentSwapV4Router04
+    /// @inheritdoc IUniswapV4IntentRouter
     function swapTokensForExactTokens(
         uint256 amountOut,
         uint256 amountInMax,
@@ -73,7 +73,7 @@ contract UniIntentSwapV4Router04 is IUniIntentSwapV4Router04, BaseSwapRouter, Mu
         public
         payable
         virtual
-        override(IUniIntentSwapV4Router04)
+        override(IUniswapV4IntentRouter)
         checkDeadline(deadline)
         setMsgSender
         returns (BalanceDelta)
@@ -93,7 +93,7 @@ contract UniIntentSwapV4Router04 is IUniIntentSwapV4Router04, BaseSwapRouter, Mu
         );
     }
 
-    /// @inheritdoc IUniIntentSwapV4Router04
+    /// @inheritdoc IUniswapV4IntentRouter
     function swap(
         int256 amountSpecified,
         uint256 amountLimit,
@@ -105,7 +105,7 @@ contract UniIntentSwapV4Router04 is IUniIntentSwapV4Router04, BaseSwapRouter, Mu
         public
         payable
         virtual
-        override(IUniIntentSwapV4Router04)
+        override(IUniswapV4IntentRouter)
         checkDeadline(deadline)
         setMsgSender
         returns (BalanceDelta)
@@ -127,7 +127,7 @@ contract UniIntentSwapV4Router04 is IUniIntentSwapV4Router04, BaseSwapRouter, Mu
 
     /// -----------------------
 
-    /// @inheritdoc IUniIntentSwapV4Router04
+    /// @inheritdoc IUniswapV4IntentRouter
     function swapExactTokensForTokens(
         uint256 amountIn,
         uint256 amountOutMin,
@@ -140,7 +140,7 @@ contract UniIntentSwapV4Router04 is IUniIntentSwapV4Router04, BaseSwapRouter, Mu
         public
         payable
         virtual
-        override(IUniIntentSwapV4Router04)
+        override(IUniswapV4IntentRouter)
         checkDeadline(deadline)
         setMsgSender
         returns (BalanceDelta)
@@ -161,7 +161,7 @@ contract UniIntentSwapV4Router04 is IUniIntentSwapV4Router04, BaseSwapRouter, Mu
         );
     }
 
-    /// @inheritdoc IUniIntentSwapV4Router04
+    /// @inheritdoc IUniswapV4IntentRouter
     function swapTokensForExactTokens(
         uint256 amountOut,
         uint256 amountInMax,
@@ -174,7 +174,7 @@ contract UniIntentSwapV4Router04 is IUniIntentSwapV4Router04, BaseSwapRouter, Mu
         public
         payable
         virtual
-        override(IUniIntentSwapV4Router04)
+        override(IUniswapV4IntentRouter)
         checkDeadline(deadline)
         setMsgSender
         returns (BalanceDelta)
@@ -195,7 +195,7 @@ contract UniIntentSwapV4Router04 is IUniIntentSwapV4Router04, BaseSwapRouter, Mu
         );
     }
 
-    /// @inheritdoc IUniIntentSwapV4Router04
+    /// @inheritdoc IUniswapV4IntentRouter
     function swap(
         int256 amountSpecified,
         uint256 amountLimit,
@@ -208,7 +208,7 @@ contract UniIntentSwapV4Router04 is IUniIntentSwapV4Router04, BaseSwapRouter, Mu
         public
         payable
         virtual
-        override(IUniIntentSwapV4Router04)
+        override(IUniswapV4IntentRouter)
         checkDeadline(deadline)
         setMsgSender
         returns (BalanceDelta)
@@ -231,12 +231,12 @@ contract UniIntentSwapV4Router04 is IUniIntentSwapV4Router04, BaseSwapRouter, Mu
 
     /// -----------------------
 
-    /// @inheritdoc IUniIntentSwapV4Router04
+    /// @inheritdoc IUniswapV4IntentRouter
     function swap(bytes calldata data, uint256 deadline)
         public
         payable
         virtual
-        override(IUniIntentSwapV4Router04)
+        override(IUniswapV4IntentRouter)
         checkDeadline(deadline)
         setMsgSender
         returns (BalanceDelta)
@@ -253,17 +253,17 @@ contract UniIntentSwapV4Router04 is IUniIntentSwapV4Router04, BaseSwapRouter, Mu
 
     /// -----------------------
 
-    /// @inheritdoc IUniIntentSwapV4Router04
+    /// @inheritdoc IUniswapV4IntentRouter
     function msgSender() public view virtual returns (address) {
         return Locker.get();
     }
 
-    /// @inheritdoc IUniIntentSwapV4Router04
+    /// @inheritdoc IUniswapV4IntentRouter
     fallback() external payable virtual {
         LibZip.cdFallback();
     }
 
-    /// @inheritdoc IUniIntentSwapV4Router04
+    /// @inheritdoc IUniswapV4IntentRouter
     receive() external payable virtual {
         IPoolManager _poolManager = poolManager;
         assembly ("memory-safe") {
