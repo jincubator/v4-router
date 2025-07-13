@@ -17,16 +17,14 @@ compilation_restrictions = [
 ]
 
 remappings = [
-  "@v4=lib/v4-core/",
   "@solady=lib/solady/",
-  "v4-core/=lib/v4-core/",
-  "@permit2=lib/permit2/src/",
-  "@forge=lib/forge-std/src/",
+  "@forge-std/=lib/forge-std/src/",
+  "@forge-gas-snapshot/=lib/forge-gas-snapshot/src/",
   "@uniswap/v4-core/=lib/v4-core/",
   "@v4-periphery/=lib/v4-periphery/",
-  "@v4-template/=lib/v4-template/",
-  "forge-std/=lib/v4-core/lib/forge-std/src/",
-  "@universal-router/=lib/universal-router/contracts/"
+  "@permit2=lib/permit2/src/",
+  "lib/permit2/test:openzeppelin-contracts/contracts/=lib/permit2/lib/openzeppelin-contracts/contracts/",
+  "@universal-router/=lib/universal-router/contracts/",
 ]
 
 [fmt]

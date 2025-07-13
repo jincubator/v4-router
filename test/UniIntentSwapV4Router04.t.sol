@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.26;
 
-import {Hooks} from "@v4/src/libraries/Hooks.sol";
-import {PoolKey} from "@v4/src/types/PoolKey.sol";
-import {Currency} from "@v4/src/types/Currency.sol";
-import {PathKey} from "../src/libraries/PathKey.sol";
-import {IERC20Minimal} from "@v4/src/interfaces/external/IERC20Minimal.sol";
-import {IERC6909Claims} from "@v4/src/interfaces/external/IERC6909Claims.sol";
+import {console2} from "forge-std/console2.sol";
 
-import {Counter} from "@v4-template/src/Counter.sol";
+import {Hooks} from "@uniswap/v4-core/src/libraries/Hooks.sol";
+import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
+import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
+import {PathKey} from "../src/libraries/PathKey.sol";
+import {IERC20Minimal} from "@uniswap/v4-core/src/interfaces/external/IERC20Minimal.sol";
+import {IERC6909Claims} from "@uniswap/v4-core/src/interfaces/external/IERC6909Claims.sol";
+
+import {Counter} from "./utils/hooks/Counter.sol";
 import {HookMiner} from "@v4-periphery/src/utils/HookMiner.sol";
 import {CustomCurveHook} from "./utils/hooks/CustomCurveHook.sol";
 import {BaseHook} from "@v4-periphery/src/utils/BaseHook.sol";
@@ -19,8 +21,8 @@ import {
     IPoolManager,
     ISignatureTransfer,
     BaseData,
-    UniIntentSwapV4Router04
-} from "../src/UniIntentSwapV4Router04.sol";
+    UniswapV4IntentRouter
+} from "../src/UniswapV4IntentRouter.sol";
 
 import {SwapRouterFixtures, Deployers} from "./utils/SwapRouterFixtures.sol";
 import {MockCurrencyLibrary} from "./utils/mocks/MockCurrencyLibrary.sol";
@@ -28,7 +30,7 @@ import {MockCurrencyLibrary} from "./utils/mocks/MockCurrencyLibrary.sol";
 contract RouterTest is SwapRouterFixtures {
     using MockCurrencyLibrary for Currency;
 
-    UniIntentSwapV4Router04 router;
+    UniswapV4IntentRouter router;
 
     Counter hook;
     CustomCurveHook hookCsmm;
@@ -41,7 +43,7 @@ contract RouterTest is SwapRouterFixtures {
     function setUp() public payable {
         // Deploy v4 contracts
         Deployers.deployFreshManagerAndRouters();
-        router = new UniIntentSwapV4Router04(manager, permit2);
+        router = new UniswapV4IntentRouter(manager, permit2);
 
         // Create currencies
         (currencyA, currencyB, currencyC, currencyD) = _createSortedCurrencies();
@@ -56,25 +58,25 @@ contract RouterTest is SwapRouterFixtures {
         currencyC.maxApprove(address(modifyLiquidityRouter));
         currencyD.maxApprove(address(modifyLiquidityRouter));
 
-        // Deploy Counter hook
-        address flags = address(
-            uint160(
-                Hooks.BEFORE_SWAP_FLAG | Hooks.AFTER_SWAP_FLAG | Hooks.BEFORE_ADD_LIQUIDITY_FLAG
-                    | Hooks.BEFORE_REMOVE_LIQUIDITY_FLAG
-            ) ^ (0x4444 << 144)
-        );
-
-        bytes memory constructorArgs = abi.encode(manager);
-        deployCodeTo("Counter.sol:Counter", constructorArgs, flags);
-        hook = Counter(flags);
-
+        // Deploy hooks to an address with the correct flags
+        // _deployCSMM();
         // Deploy CustomCurveHook
         address csmmFlags =
             address(uint160(Hooks.BEFORE_SWAP_FLAG | Hooks.AFTER_SWAP_FLAG) ^ (0x5555 << 144));
         bytes memory csmmConstructorArgs = abi.encode(manager);
         deployCodeTo("CustomCurveHook.sol:CustomCurveHook", csmmConstructorArgs, csmmFlags);
         hookCsmm = CustomCurveHook(csmmFlags);
+        _deployCounterHook();
+        _deployIntentSwapHook();
 
+        console2.log("address(0)");
+        console2.log(address(0));
+        console2.log("address(counterHook)");
+        console2.log(address(counterHook));
+        console2.log("address(csmm)");
+        console2.log(address(csmm));
+        console2.log("address(intentSwapHook)");
+        console2.log(address(intentSwapHook));
         // Define and create all pools with their respective hooks
         PoolKey[] memory _vanillaPoolKeys = _createPoolKeys(address(0));
         _copyArrayToStorage(_vanillaPoolKeys, vanillaPoolKeys);
@@ -82,7 +84,7 @@ contract RouterTest is SwapRouterFixtures {
         PoolKey[] memory _nativePoolKeys = _createNativePoolKeys(address(0));
         _copyArrayToStorage(_nativePoolKeys, nativePoolKeys);
 
-        PoolKey[] memory _hookedPoolKeys = _createPoolKeys(address(hook));
+        PoolKey[] memory _hookedPoolKeys = _createPoolKeys(address(counterHook));
         _copyArrayToStorage(_hookedPoolKeys, hookedPoolKeys);
 
         PoolKey[] memory _csmmPoolKeys = _createPoolKeys(address(hookCsmm));
@@ -126,7 +128,7 @@ contract RouterTest is SwapRouterFixtures {
     }
 
     function test_router_deploy_gas() public {
-        router = new UniIntentSwapV4Router04(manager, permit2);
+        router = new UniswapV4IntentRouter(manager, permit2);
     }
 
     function test_zero_for_one() public {

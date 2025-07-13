@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.26;
 
-import {IERC20} from "@forge/interfaces/IERC20.sol";
+import {console2} from "forge-std/console2.sol";
+import {IERC20} from "@forge-std/interfaces/IERC20.sol";
 
-import {PoolKey} from "@v4/src/types/PoolKey.sol";
-import {PoolId} from "@v4/src/types/PoolId.sol";
-import {IHooks} from "@v4/src/interfaces/IHooks.sol";
-import {Hooks} from "@v4/src/libraries/Hooks.sol";
-import {Currency, CurrencyLibrary} from "@v4/src/types/Currency.sol";
+import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
+import {PoolId} from "@uniswap/v4-core/src/types/PoolId.sol";
+import {IHooks} from "@uniswap/v4-core/src/interfaces/IHooks.sol";
+import {Hooks} from "@uniswap/v4-core/src/libraries/Hooks.sol";
+import {Currency, CurrencyLibrary} from "@uniswap/v4-core/src/types/Currency.sol";
 import {Deployers} from "./Deployers.sol";
-import {SafeCast} from "@v4/src/libraries/SafeCast.sol";
+import {SafeCast} from "@uniswap/v4-core/src/libraries/SafeCast.sol";
 
 import {MockERC20} from "@solady/test/utils/mocks/MockERC20.sol";
 
@@ -21,6 +22,13 @@ import {HookMsgSender} from "./hooks/HookMsgSender.sol";
 import {DeployPermit2} from "permit2/test/utils/DeployPermit2.sol";
 import {PermitSignature} from "permit2/test/utils/PermitSignature.sol";
 import "permit2/src/interfaces/IPermit2.sol";
+
+// Add in Counter and IntentSwap
+import {ICounter} from "../../src/interfaces/ICounter.sol";
+import {CounterDeployer} from "./hooks/CounterDeployer.sol";
+import {IIntentSwapHook} from "../../src/interfaces/IIntentSwapHook.sol";
+import {IntentSwapHookDeployer} from "./hooks/IntentSwapHookDeployer.sol";
+import {CounterDeployer} from "./hooks/CounterDeployer.sol";
 
 struct TestCurrencyBalances {
     uint256 currencyA;
@@ -44,6 +52,8 @@ contract SwapRouterFixtures is Deployers, DeployPermit2, PermitSignature {
     Currency currencyD;
 
     CSMM csmm;
+    ICounter counterHook;
+    IIntentSwapHook intentSwapHook;
     HookData hookWithData;
     HookMsgSender hookMsgSender;
     ISignatureTransfer permit2 = ISignatureTransfer(address(PERMIT2_ADDRESS));
@@ -78,6 +88,7 @@ contract SwapRouterFixtures is Deployers, DeployPermit2, PermitSignature {
     /// Hook Deployment Functions ///
 
     function _deployCSMM() internal {
+        console2.log("In CSMM Deploy");
         address flags = address(
             uint160(
                 Hooks.BEFORE_SWAP_FLAG | Hooks.BEFORE_SWAP_RETURNS_DELTA_FLAG
@@ -87,6 +98,22 @@ contract SwapRouterFixtures is Deployers, DeployPermit2, PermitSignature {
         bytes memory constructorArgs = abi.encode(manager);
         deployCodeTo("test/utils/hooks/CSMM.sol:CSMM", constructorArgs, flags);
         csmm = CSMM(flags);
+        vm.label(address(csmm), "CSMM");
+    }
+
+    function _deployCounterHook() internal {
+        console2.log("In _deployCounterHook");
+        counterHook = ICounter(CounterDeployer.deploy(address(manager)));
+        console2.log("Out _deployCounterHook");
+        vm.label(address(counterHook), "ICounter");
+    }
+
+    function _deployIntentSwapHook() internal {
+        console2.log("In _deployIntentSwapHook");
+        intentSwapHook = IIntentSwapHook(IntentSwapHookDeployer.deploy(address(manager)));
+        console2.log("Out _deployIntentSwapHook");
+
+        vm.label(address(intentSwapHook), "IIntentSwapHook");
     }
 
     function _deployHookWithData() internal {
