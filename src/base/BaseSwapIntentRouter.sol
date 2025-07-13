@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.26;
 
+import {console2} from "forge-std/console2.sol";
 import {SwapFlags} from "../libraries/SwapFlags.sol";
 import {SafeCast} from "@uniswap/v4-core/src/libraries/SafeCast.sol";
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
@@ -30,7 +31,7 @@ struct PermitPayload {
 /// @title Base Swap Router
 /// @notice Template for data parsing and callback swap handling in Uniswap V4
 /// @dev Fee-on-transfer tokens are not supported - these swaps might not pass
-abstract contract BaseSwapRouter is SafeCallback {
+abstract contract BaseSwapIntentRouter is SafeCallback {
     using CurrencySettler for Currency;
     using PathKeyLibrary for PathKey;
     using SafeCast for uint256;
@@ -80,11 +81,22 @@ abstract contract BaseSwapRouter is SafeCallback {
         unchecked {
             BaseData memory data = abi.decode(callbackData, (BaseData));
 
-            (bool singleSwap, bool exactOutput, bool input6909, bool output6909, bool _permit2,) =
-                SwapFlags.unpackFlags(data.flags);
+            (
+                bool singleSwap,
+                bool exactOutput,
+                bool input6909,
+                bool output6909,
+                bool _permit2,
+                bool intentSwap
+            ) = SwapFlags.unpackFlags(data.flags);
 
             (Currency inputCurrency, Currency outputCurrency, BalanceDelta delta) =
                 _parseAndSwap(singleSwap, exactOutput, data.amount, callbackData);
+
+            if (intentSwap) {
+                console2.log("This is an intent Swap");
+                return abi.encode(delta);
+            }
 
             uint256 inputAmount = inputCurrency < outputCurrency
                 ? uint256(int256(-delta.amount0()))
