@@ -149,7 +149,7 @@ contract RouterTest is SwapRouterFixtures {
         router = new UniswapV4IntentRouter(manager, permit2);
     }
 
-    function test_zero_for_one() public {
+    function test_zero_for_one_intent() public {
         // For zeroForOne, we need to approve and have balance of currency0 (AA)
         Currency currency0 = vanillaPoolKeys[0].currency0;
         currency0.mint(address(this), 1 ether);

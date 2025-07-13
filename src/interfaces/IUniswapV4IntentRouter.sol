@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.26;
+pragma solidity ^0.8.30;
 
 import {PathKey} from "../libraries/PathKey.sol";
 import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";

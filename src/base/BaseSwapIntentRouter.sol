@@ -6,7 +6,11 @@ import {SwapFlags} from "../libraries/SwapFlags.sol";
 import {SafeCast} from "@uniswap/v4-core/src/libraries/SafeCast.sol";
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 import {CurrencySettler} from "@uniswap/v4-core/test/utils/CurrencySettler.sol";
-import {BalanceDelta, toBalanceDelta} from "@uniswap/v4-core/src/types/BalanceDelta.sol";
+import {
+    BalanceDelta,
+    toBalanceDelta,
+    BalanceDeltaLibrary
+} from "@uniswap/v4-core/src/types/BalanceDelta.sol";
 import {ISignatureTransfer} from "@permit2/interfaces/ISignatureTransfer.sol";
 import {IPoolManager, SafeCallback} from "@v4-periphery/src/base/SafeCallback.sol";
 import {ModifyLiquidityParams, SwapParams} from "@uniswap/v4-core/src/types/PoolOperation.sol";
@@ -90,13 +94,15 @@ abstract contract BaseSwapIntentRouter is SafeCallback {
                 bool intentSwap
             ) = SwapFlags.unpackFlags(data.flags);
 
-            (Currency inputCurrency, Currency outputCurrency, BalanceDelta delta) =
-                _parseAndSwap(singleSwap, exactOutput, data.amount, callbackData);
-
+            // For intentSwap the hook has already settled all the tokens and recorded the intent
+            // So no action required on callback.
             if (intentSwap) {
                 console2.log("This is an intent Swap");
-                return abi.encode(delta);
+                return abi.encode(BalanceDeltaLibrary.ZERO_DELTA);
             }
+
+            (Currency inputCurrency, Currency outputCurrency, BalanceDelta delta) =
+                _parseAndSwap(singleSwap, exactOutput, data.amount, callbackData);
 
             uint256 inputAmount = inputCurrency < outputCurrency
                 ? uint256(int256(-delta.amount0()))
