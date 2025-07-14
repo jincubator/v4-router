@@ -96,13 +96,28 @@ abstract contract BaseSwapIntentRouter is SafeCallback {
 
             // For intentSwap the hook will settled all the tokens and recorded the intent
             // So perform a stripped down version of swap without any settlement
-            // TODO make more modular and add slippage checks
+            // TODO make more modular and decide on slippage checks (can't do it from delta so may need to do it in hook)
             if (intentSwap) {
                 bool zeroForOne;
                 PoolKey memory key;
                 bytes memory hookData;
                 Currency inputCurrency;
                 Currency outputCurrency;
+
+                // Check for slippage
+                // uint256 inputAmount = inputCurrency < outputCurrency
+                //     ? uint256(int256(-delta.amount0()))
+                //     : uint256(int256(-delta.amount1()));
+                // uint256 outputAmount = inputCurrency < outputCurrency
+                //     ? uint256(int256(delta.amount1()))
+                //     : uint256(int256(delta.amount0()));
+
+                // if (exactOutput ? inputAmount > data.amountLimit : outputAmount < data.amountLimit)
+                // {
+                //     revert SlippageExceeded();
+                // }
+
+                // Perform Intent Swap
                 (, zeroForOne, key, hookData) =
                     abi.decode(callbackData, (BaseData, bool, PoolKey, bytes));
 
@@ -115,7 +130,8 @@ abstract contract BaseSwapIntentRouter is SafeCallback {
                     exactOutput ? data.amount.toInt256() : -(data.amount.toInt256()),
                     hookData
                 );
-                return abi.encode(BalanceDeltaLibrary.ZERO_DELTA);
+                // return abi.encode(BalanceDeltaLibrary.ZERO_DELTA);
+                return abi.encode(delta);
             }
 
             (Currency inputCurrency, Currency outputCurrency, BalanceDelta delta) =
