@@ -73,6 +73,25 @@ interface IUniswapV4IntentRouter {
     /// @param poolKey the pool to swap through
     /// @param hookData the data to be passed to the hook
     /// @param receiver the address to send the output tokens to
+    /// @param deadline block.timestamp must be before this value, otherwise the transaction will revert
+    /// @return Delta the balance changes from the swap
+    function swapExactTokensForTokens(
+        uint256 amountIn,
+        uint256 amountOutMin,
+        bool zeroForOne,
+        PoolKey calldata poolKey,
+        bytes calldata hookData,
+        address receiver,
+        uint256 deadline
+    ) external payable returns (BalanceDelta);
+
+    /// @notice IntentSwap Single pool, exact input swap - swap the specified amount of input tokens for as many output tokens as possible, on a single pool
+    /// @param amountIn the amount of input tokens to swap
+    /// @param amountOutMin the minimum amount of output tokens that must be received for the transaction not to revert
+    /// @param zeroForOne the direction of the swap, true if currency0 is being swapped for currency1
+    /// @param poolKey the pool to swap through
+    /// @param hookData the data to be passed to the hook
+    /// @param receiver the address to send the output tokens to
     /// @param solverDeadline solvers must provide a solution before this block.timestamp, otherwise the solve will revert and execute can take place
     /// @param deadline block.timestamp must be before this value, otherwise the transaction will revert
     /// @param intentSwap true indicates this is an intent Swap

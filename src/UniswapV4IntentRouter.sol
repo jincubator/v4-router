@@ -140,6 +140,40 @@ contract UniswapV4IntentRouter is IUniswapV4IntentRouter, BaseSwapIntentRouter, 
         PoolKey calldata poolKey,
         bytes calldata hookData,
         address receiver,
+        uint256 deadline
+    )
+        public
+        payable
+        virtual
+        override(IUniswapV4IntentRouter)
+        checkDeadline(deadline)
+        setMsgSender
+        returns (BalanceDelta)
+    {
+        return _unlockAndDecode(
+            abi.encode(
+                BaseData({
+                    amount: amountIn,
+                    amountLimit: amountOutMin,
+                    payer: msg.sender,
+                    receiver: receiver,
+                    flags: SwapFlags.SINGLE_SWAP
+                }),
+                zeroForOne,
+                poolKey,
+                hookData
+            )
+        );
+    }
+
+    /// @inheritdoc IUniswapV4IntentRouter
+    function swapExactTokensForTokens(
+        uint256 amountIn,
+        uint256 amountOutMin,
+        bool zeroForOne,
+        PoolKey calldata poolKey,
+        bytes calldata hookData,
+        address receiver,
         uint256 solverDeadline,
         uint256 deadline,
         bool intentSwap
