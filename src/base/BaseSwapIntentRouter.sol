@@ -94,10 +94,27 @@ abstract contract BaseSwapIntentRouter is SafeCallback {
                 bool intentSwap
             ) = SwapFlags.unpackFlags(data.flags);
 
-            // For intentSwap the hook has already settled all the tokens and recorded the intent
-            // So no action required on callback.
+            // For intentSwap the hook will settled all the tokens and recorded the intent
+            // So perform a stripped down version of swap without any settlement
+            // TODO make more modular and add slippage checks
             if (intentSwap) {
+                bool zeroForOne;
+                PoolKey memory key;
+                bytes memory hookData;
+                Currency inputCurrency;
+                Currency outputCurrency;
+                (, zeroForOne, key, hookData) =
+                    abi.decode(callbackData, (BaseData, bool, PoolKey, bytes));
+
+                (inputCurrency, outputCurrency) =
+                    zeroForOne ? (key.currency0, key.currency1) : (key.currency1, key.currency0);
                 console2.log("This is an intent Swap");
+                BalanceDelta delta = _swap(
+                    key,
+                    zeroForOne,
+                    exactOutput ? data.amount.toInt256() : -(data.amount.toInt256()),
+                    hookData
+                );
                 return abi.encode(BalanceDeltaLibrary.ZERO_DELTA);
             }
 
