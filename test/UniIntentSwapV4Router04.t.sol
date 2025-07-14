@@ -107,14 +107,24 @@ contract RouterTest is SwapRouterFixtures {
             vanillaPoolKeys[0],
             "",
             address(this),
-            99 // deadline in the past
+            50, // solver deadline in the past
+            99, // execute deadline in the past
+            true // this is an intentSwap
         );
     }
 
     function test_revert_zero_amount() public {
         vm.expectRevert(); // Should revert due to zero amount
         router.swapExactTokensForTokens(
-            0, 0, true, vanillaPoolKeys[0], "", address(this), block.timestamp + 1
+            0,
+            0,
+            true,
+            vanillaPoolKeys[0],
+            "",
+            address(this),
+            block.timestamp + 10,
+            block.timestamp + 20,
+            true
         );
     }
 
@@ -123,7 +133,15 @@ contract RouterTest is SwapRouterFixtures {
 
         vm.expectRevert(); // Should revert due to insufficient balance
         router.swapExactTokensForTokens(
-            hugeAmount, 0, true, vanillaPoolKeys[0], "", address(this), block.timestamp + 1
+            hugeAmount,
+            0,
+            true,
+            vanillaPoolKeys[0],
+            "",
+            address(this),
+            block.timestamp + 10,
+            block.timestamp + 20,
+            true
         );
     }
 
@@ -131,7 +149,7 @@ contract RouterTest is SwapRouterFixtures {
         router = new UniswapV4IntentRouter(manager, permit2);
     }
 
-    function test_zero_for_one() public {
+    function test_zero_for_one_intent() public {
         // For zeroForOne, we need to approve and have balance of currency0 (AA)
         Currency currency0 = vanillaPoolKeys[0].currency0;
         currency0.mint(address(this), 1 ether);
@@ -147,7 +165,9 @@ contract RouterTest is SwapRouterFixtures {
             vanillaPoolKeys[0],
             "",
             address(this),
-            block.timestamp + 1
+            block.timestamp + 10,
+            block.timestamp + 20,
+            true //this is an intentSwap
         );
 
         uint256 balanceAfter =
@@ -172,7 +192,9 @@ contract RouterTest is SwapRouterFixtures {
             vanillaPoolKeys[0],
             "",
             address(this),
-            block.timestamp + 1
+            block.timestamp + 10,
+            block.timestamp + 20,
+            true
         );
 
         uint256 balanceAfter =
@@ -198,7 +220,9 @@ contract RouterTest is SwapRouterFixtures {
             vanillaPoolKeys[0],
             "",
             address(this),
-            block.timestamp + 1
+            block.timestamp + 10,
+            block.timestamp + 20,
+            true
         );
     }
 
@@ -241,7 +265,9 @@ contract RouterTest is SwapRouterFixtures {
             vanillaPoolKeys[0],
             "",
             address(this),
-            block.timestamp + 1
+            block.timestamp + 10,
+            block.timestamp + 20,
+            true
         );
     }
 

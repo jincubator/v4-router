@@ -12,10 +12,15 @@ import {
 import {LibZip} from "@solady/src/utils/LibZip.sol";
 import {Locker} from "@v4-periphery/src/libraries/Locker.sol";
 import {Multicallable} from "@solady/src/utils/Multicallable.sol";
-import {IPoolManager, SwapFlags, BaseData, BaseSwapRouter} from "./base/BaseSwapRouter.sol";
+import {
+    IPoolManager,
+    SwapFlags,
+    BaseData,
+    BaseSwapIntentRouter
+} from "./base/BaseSwapIntentRouter.sol";
 
 /// @title Uniswap V4 Swap Router
-contract UniswapV4IntentRouter is IUniswapV4IntentRouter, BaseSwapRouter, Multicallable {
+contract UniswapV4IntentRouter is IUniswapV4IntentRouter, BaseSwapIntentRouter, Multicallable {
     modifier setMsgSender() {
         Locker.set(msg.sender);
         _;
@@ -24,7 +29,7 @@ contract UniswapV4IntentRouter is IUniswapV4IntentRouter, BaseSwapRouter, Multic
 
     constructor(IPoolManager manager, ISignatureTransfer _permit2)
         payable
-        BaseSwapRouter(manager, _permit2)
+        BaseSwapIntentRouter(manager, _permit2)
     {}
 
     /// -----------------------
@@ -153,6 +158,47 @@ contract UniswapV4IntentRouter is IUniswapV4IntentRouter, BaseSwapRouter, Multic
                     payer: msg.sender,
                     receiver: receiver,
                     flags: SwapFlags.SINGLE_SWAP
+                }),
+                zeroForOne,
+                poolKey,
+                hookData
+            )
+        );
+    }
+
+    /// @inheritdoc IUniswapV4IntentRouter
+    function swapExactTokensForTokens(
+        uint256 amountIn,
+        uint256 amountOutMin,
+        bool zeroForOne,
+        PoolKey calldata poolKey,
+        bytes calldata hookData,
+        address receiver,
+        uint256 solverDeadline,
+        uint256 deadline,
+        bool intentSwap
+    )
+        public
+        payable
+        virtual
+        override(IUniswapV4IntentRouter)
+        checkDeadline(deadline)
+        setMsgSender
+        returns (BalanceDelta)
+    {
+        // Build the flags
+        uint8 flags = SwapFlags.SINGLE_SWAP;
+        if (intentSwap) {
+            flags |= SwapFlags.INTENT;
+        }
+        return _unlockAndDecode(
+            abi.encode(
+                BaseData({
+                    amount: amountIn,
+                    amountLimit: amountOutMin,
+                    payer: msg.sender,
+                    receiver: receiver,
+                    flags: flags
                 }),
                 zeroForOne,
                 poolKey,

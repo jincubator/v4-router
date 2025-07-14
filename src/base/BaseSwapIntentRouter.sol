@@ -1,11 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.26;
 
+import {console2} from "forge-std/console2.sol";
 import {SwapFlags} from "../libraries/SwapFlags.sol";
 import {SafeCast} from "@uniswap/v4-core/src/libraries/SafeCast.sol";
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 import {CurrencySettler} from "@uniswap/v4-core/test/utils/CurrencySettler.sol";
-import {BalanceDelta, toBalanceDelta} from "@uniswap/v4-core/src/types/BalanceDelta.sol";
+import {
+    BalanceDelta,
+    toBalanceDelta,
+    BalanceDeltaLibrary
+} from "@uniswap/v4-core/src/types/BalanceDelta.sol";
 import {ISignatureTransfer} from "@permit2/interfaces/ISignatureTransfer.sol";
 import {IPoolManager, SafeCallback} from "@v4-periphery/src/base/SafeCallback.sol";
 import {ModifyLiquidityParams, SwapParams} from "@uniswap/v4-core/src/types/PoolOperation.sol";
@@ -30,7 +35,7 @@ struct PermitPayload {
 /// @title Base Swap Router
 /// @notice Template for data parsing and callback swap handling in Uniswap V4
 /// @dev Fee-on-transfer tokens are not supported - these swaps might not pass
-abstract contract BaseSwapRouter is SafeCallback {
+abstract contract BaseSwapIntentRouter is SafeCallback {
     using CurrencySettler for Currency;
     using PathKeyLibrary for PathKey;
     using SafeCast for uint256;
@@ -80,8 +85,21 @@ abstract contract BaseSwapRouter is SafeCallback {
         unchecked {
             BaseData memory data = abi.decode(callbackData, (BaseData));
 
-            (bool singleSwap, bool exactOutput, bool input6909, bool output6909, bool _permit2,) =
-                SwapFlags.unpackFlags(data.flags);
+            (
+                bool singleSwap,
+                bool exactOutput,
+                bool input6909,
+                bool output6909,
+                bool _permit2,
+                bool intentSwap
+            ) = SwapFlags.unpackFlags(data.flags);
+
+            // For intentSwap the hook has already settled all the tokens and recorded the intent
+            // So no action required on callback.
+            if (intentSwap) {
+                console2.log("This is an intent Swap");
+                return abi.encode(BalanceDeltaLibrary.ZERO_DELTA);
+            }
 
             (Currency inputCurrency, Currency outputCurrency, BalanceDelta delta) =
                 _parseAndSwap(singleSwap, exactOutput, data.amount, callbackData);

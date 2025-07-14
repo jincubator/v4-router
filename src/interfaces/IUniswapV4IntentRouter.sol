@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.26;
+pragma solidity ^0.8.30;
 
 import {PathKey} from "../libraries/PathKey.sol";
 import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
@@ -83,6 +83,29 @@ interface IUniswapV4IntentRouter {
         bytes calldata hookData,
         address receiver,
         uint256 deadline
+    ) external payable returns (BalanceDelta);
+
+    /// @notice IntentSwap Single pool, exact input swap - swap the specified amount of input tokens for as many output tokens as possible, on a single pool
+    /// @param amountIn the amount of input tokens to swap
+    /// @param amountOutMin the minimum amount of output tokens that must be received for the transaction not to revert
+    /// @param zeroForOne the direction of the swap, true if currency0 is being swapped for currency1
+    /// @param poolKey the pool to swap through
+    /// @param hookData the data to be passed to the hook
+    /// @param receiver the address to send the output tokens to
+    /// @param solverDeadline solvers must provide a solution before this block.timestamp, otherwise the solve will revert and execute can take place
+    /// @param deadline block.timestamp must be before this value, otherwise the transaction will revert
+    /// @param intentSwap true indicates this is an intent Swap
+    /// @return Delta the balance changes from the swap
+    function swapExactTokensForTokens(
+        uint256 amountIn,
+        uint256 amountOutMin,
+        bool zeroForOne,
+        PoolKey calldata poolKey,
+        bytes calldata hookData,
+        address receiver,
+        uint256 solverDeadline,
+        uint256 deadline,
+        bool intentSwap
     ) external payable returns (BalanceDelta);
 
     /// @notice Singe pool, exact output swap; swap as few input tokens as possible for the specified amount of output tokens, on a single pool
